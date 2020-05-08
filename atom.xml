@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lagoonwe.github.io/</id>
     <title>WinkiLee&apos;s Blog</title>
-    <updated>2020-02-29T07:36:14.559Z</updated>
+    <updated>2020-05-08T12:14:35.893Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lagoonwe.github.io/"/>
     <link rel="self" href="https://lagoonwe.github.io/atom.xml"/>
@@ -10,4 +10,152 @@
     <logo>https://lagoonwe.github.io/images/avatar.png</logo>
     <icon>https://lagoonwe.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, WinkiLee&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[Golang数据结构算法之数组相关]]></title>
+        <id>https://lagoonwe.github.io/post/golang-shu-ju-jie-gou-suan-fa-zhi-shu-zu-xiang-guan/</id>
+        <link href="https://lagoonwe.github.io/post/golang-shu-ju-jie-gou-suan-fa-zhi-shu-zu-xiang-guan/">
+        </link>
+        <updated>2020-05-08T12:13:03.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="golang数据结构算法之数组相关">Golang数据结构算法之数组相关</h2>
+<blockquote>
+<p>提供的接口</p>
+</blockquote>
+<ul>
+<li>返回数组大小</li>
+<li>根据索引获取数组元素</li>
+<li>根据索引修改数组元素</li>
+<li>根据索引插入数组元素</li>
+<li>数组末尾追加元素（添加元素）</li>
+<li>清空数组</li>
+<li>根据索引删除数组元素</li>
+<li>返回数组字符串</li>
+</ul>
+<blockquote>
+<p>首先定义一个数组结构体，结构体内容为数组内容以及数组大小，如下</p>
+</blockquote>
+<pre><code class="language-go">type ArrayList struct {
+	dataStore [] interface{} // 数组的存储
+	TheSize int // 数组的大小
+}
+</code></pre>
+<p>数组类型采用interface{}形式表示可以接收任何类型的数组，例如字符串和整型</p>
+<blockquote>
+<p>编写数组初始化方法</p>
+</blockquote>
+<pre><code class="language-go">func NewArrayList() *ArrayList {
+	list := new(ArrayList) // 初始化结构体
+	list.dataStore = make([]interface{},0,10) //开辟内存
+	list.TheSize = 0
+	return list
+}
+</code></pre>
+<blockquote>
+<p>添加数组元素（追加数组）Append(),调用默认库的append方法，记得同步增加长度</p>
+</blockquote>
+<pre><code class="language-go">func (list *ArrayList)Append(newval interface{}) {
+	list.dataStore = append(list.dataStore,newval)
+	list.TheSize++
+}
+</code></pre>
+<blockquote>
+<p>根据索引获取数组元素</p>
+</blockquote>
+<pre><code class="language-go">func (list *ArrayList) Get(index int) (interface{},error){
+	if index &lt; 0 || index &gt;= list.TheSize {
+		return nil,errors.New(&quot;索引越界&quot;)
+	}
+	return list.dataStore[index],nil
+}
+</code></pre>
+<blockquote>
+<p>根据索引修改数组元素</p>
+</blockquote>
+<pre><code class="language-go">func (list *ArrayList)Set(index int, newval interface{}) error{
+	if index &lt; 0 || index &gt;= list.TheSize {
+		return errors.New(&quot;索引越界&quot;)
+	}
+	list.dataStore[index] = newval // 对数据进行新值设置
+	return nil
+}
+</code></pre>
+<blockquote>
+<p>根据索引插入数组元素</p>
+</blockquote>
+<pre><code class="language-go">func (list *ArrayList)Insert(index int, newval interface{}) error{
+	if index &lt; 0 || index &gt;= list.TheSize {
+		return errors.New(&quot;索引越界&quot;)
+	}
+	list.checkisFull() // 检测数组是否为满，是否需要开辟双倍内存
+	list.dataStore = list.dataStore[:list.TheSize+1] // 插入数据，内存移动一位
+	for i := list.TheSize;i &gt; index;i--{ 
+		list.dataStore[i] = list.dataStore[i-1]
+	}
+	list.dataStore[index] = newval 
+	list.TheSize++ 
+	return nil
+}
+</code></pre>
+<p>插入方法有一个检测数组是否为满的方法，如果数组已经是满的时无法进行元素插入操作的，因为开辟内存时，默认数组10位，如果数组为满的话，开启双倍内存，以插入新元素，checkisFull()如下</p>
+<pre><code class="language-go">func (list *ArrayList)checkisFull ()  {
+	if list.TheSize == cap(list.dataStore) {
+		newdataStore := make([]interface{},2*list.TheSize,2*list.TheSize) // 开辟双倍内存
+		copy(newdataStore,list.dataStore) // 拷贝数据
+		list.dataStore = newdataStore
+	}
+}
+</code></pre>
+<blockquote>
+<p>清空数组</p>
+</blockquote>
+<pre><code class="language-go">func (list *ArrayList)Clear(){
+	list.dataStore = make([]interface{},0,10)
+	list.TheSize = 0
+}
+</code></pre>
+<blockquote>
+<p>根据索引删除数组元素</p>
+</blockquote>
+<pre><code class="language-go">func (list *ArrayList)Delete(index int) error{
+	if index &lt; 0 || index &gt;= list.TheSize {
+		return errors.New(&quot;索引越界&quot;)
+	}
+	list.dataStore = append(list.dataStore[:index],list.dataStore[index+1:]...)
+	return nil
+}
+</code></pre>
+<p>这里巧用了append方法，将要删除元素索引位置之前和之后的元素进行了拼接，返回的就是删除索引元素后的新数组</p>
+<blockquote>
+<p>测试如下</p>
+</blockquote>
+<pre><code class="language-go">func main() {
+	var list ArrayList.List = ArrayList.NewArrayList()
+	list.Append(&quot;a1&quot;)
+	list.Append(&quot;b&quot;)
+	list.Append(&quot;c&quot;)
+	for i := 0; i &lt; 10; i++ {
+		list.Insert(1, &quot;x&quot;)
+		fmt.Println(list)
+	}
+}
+</code></pre>
+<blockquote>
+<p>输出如下</p>
+</blockquote>
+<pre><code class="language-go">[a x b c]
+[a x x b c]
+[a x x x b c]
+[a x x x x b c]
+[a x x x x x b c]
+[a x x x x x x b c]
+[a x x x x x x x b c]
+[a x x x x x x x x b c]
+[a x x x x x x x x x b c]
+[a x x x x x x x x x x b c]
+
+Process finished with exit code 0
+
+</code></pre>
+<p>可见是开辟了双倍内存后的插入</p>
+]]></content>
+    </entry>
 </feed>

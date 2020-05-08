@@ -1,0 +1,317 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Golang数据结构算法之数组相关 | WinkiLee&#39;s Blog</title>
+<link rel="shortcut icon" href="https://lagoonwe.github.io//favicon.ico?v=1588940072517">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://lagoonwe.github.io//styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="Golang数据结构算法之数组相关 | WinkiLee&#39;s Blog - Atom Feed" href="https://lagoonwe.github.io//atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="Golang数据结构算法之数组相关
+
+提供的接口
+
+
+返回数组大小
+根据索引获取数组元素
+根据索引修改数组元素
+根据索引插入数组元素
+数组末尾追加元素（添加元素）
+清空数组
+根据索引删除数组元素
+返回数组字符串
+
+
+首先定义一个数组结构体，..." />
+    <meta name="keywords" content="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lagoonwe.github.io/">
+  <img class="avatar" src="https://lagoonwe.github.io//images/avatar.png?v=1588940072517" alt="">
+  </a>
+  <h1 class="site-title">
+    WinkiLee&#39;s Blog
+  </h1>
+  <p class="site-description">
+    别慌张，你看月亮也在大海深处不知所措呢
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Golang数据结构算法之数组相关
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-05-08
+              </span>
+              <span>
+                4 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="golang数据结构算法之数组相关">Golang数据结构算法之数组相关</h2>
+<blockquote>
+<p>提供的接口</p>
+</blockquote>
+<ul>
+<li>返回数组大小</li>
+<li>根据索引获取数组元素</li>
+<li>根据索引修改数组元素</li>
+<li>根据索引插入数组元素</li>
+<li>数组末尾追加元素（添加元素）</li>
+<li>清空数组</li>
+<li>根据索引删除数组元素</li>
+<li>返回数组字符串</li>
+</ul>
+<blockquote>
+<p>首先定义一个数组结构体，结构体内容为数组内容以及数组大小，如下</p>
+</blockquote>
+<pre><code class="language-go">type ArrayList struct {
+	dataStore [] interface{} // 数组的存储
+	TheSize int // 数组的大小
+}
+</code></pre>
+<p>数组类型采用interface{}形式表示可以接收任何类型的数组，例如字符串和整型</p>
+<blockquote>
+<p>编写数组初始化方法</p>
+</blockquote>
+<pre><code class="language-go">func NewArrayList() *ArrayList {
+	list := new(ArrayList) // 初始化结构体
+	list.dataStore = make([]interface{},0,10) //开辟内存
+	list.TheSize = 0
+	return list
+}
+</code></pre>
+<blockquote>
+<p>添加数组元素（追加数组）Append(),调用默认库的append方法，记得同步增加长度</p>
+</blockquote>
+<pre><code class="language-go">func (list *ArrayList)Append(newval interface{}) {
+	list.dataStore = append(list.dataStore,newval)
+	list.TheSize++
+}
+</code></pre>
+<blockquote>
+<p>根据索引获取数组元素</p>
+</blockquote>
+<pre><code class="language-go">func (list *ArrayList) Get(index int) (interface{},error){
+	if index &lt; 0 || index &gt;= list.TheSize {
+		return nil,errors.New(&quot;索引越界&quot;)
+	}
+	return list.dataStore[index],nil
+}
+</code></pre>
+<blockquote>
+<p>根据索引修改数组元素</p>
+</blockquote>
+<pre><code class="language-go">func (list *ArrayList)Set(index int, newval interface{}) error{
+	if index &lt; 0 || index &gt;= list.TheSize {
+		return errors.New(&quot;索引越界&quot;)
+	}
+	list.dataStore[index] = newval // 对数据进行新值设置
+	return nil
+}
+</code></pre>
+<blockquote>
+<p>根据索引插入数组元素</p>
+</blockquote>
+<pre><code class="language-go">func (list *ArrayList)Insert(index int, newval interface{}) error{
+	if index &lt; 0 || index &gt;= list.TheSize {
+		return errors.New(&quot;索引越界&quot;)
+	}
+	list.checkisFull() // 检测数组是否为满，是否需要开辟双倍内存
+	list.dataStore = list.dataStore[:list.TheSize+1] // 插入数据，内存移动一位
+	for i := list.TheSize;i &gt; index;i--{ 
+		list.dataStore[i] = list.dataStore[i-1]
+	}
+	list.dataStore[index] = newval 
+	list.TheSize++ 
+	return nil
+}
+</code></pre>
+<p>插入方法有一个检测数组是否为满的方法，如果数组已经是满的时无法进行元素插入操作的，因为开辟内存时，默认数组10位，如果数组为满的话，开启双倍内存，以插入新元素，checkisFull()如下</p>
+<pre><code class="language-go">func (list *ArrayList)checkisFull ()  {
+	if list.TheSize == cap(list.dataStore) {
+		newdataStore := make([]interface{},2*list.TheSize,2*list.TheSize) // 开辟双倍内存
+		copy(newdataStore,list.dataStore) // 拷贝数据
+		list.dataStore = newdataStore
+	}
+}
+</code></pre>
+<blockquote>
+<p>清空数组</p>
+</blockquote>
+<pre><code class="language-go">func (list *ArrayList)Clear(){
+	list.dataStore = make([]interface{},0,10)
+	list.TheSize = 0
+}
+</code></pre>
+<blockquote>
+<p>根据索引删除数组元素</p>
+</blockquote>
+<pre><code class="language-go">func (list *ArrayList)Delete(index int) error{
+	if index &lt; 0 || index &gt;= list.TheSize {
+		return errors.New(&quot;索引越界&quot;)
+	}
+	list.dataStore = append(list.dataStore[:index],list.dataStore[index+1:]...)
+	return nil
+}
+</code></pre>
+<p>这里巧用了append方法，将要删除元素索引位置之前和之后的元素进行了拼接，返回的就是删除索引元素后的新数组</p>
+<blockquote>
+<p>测试如下</p>
+</blockquote>
+<pre><code class="language-go">func main() {
+	var list ArrayList.List = ArrayList.NewArrayList()
+	list.Append(&quot;a1&quot;)
+	list.Append(&quot;b&quot;)
+	list.Append(&quot;c&quot;)
+	for i := 0; i &lt; 10; i++ {
+		list.Insert(1, &quot;x&quot;)
+		fmt.Println(list)
+	}
+}
+</code></pre>
+<blockquote>
+<p>输出如下</p>
+</blockquote>
+<pre><code class="language-go">[a x b c]
+[a x x b c]
+[a x x x b c]
+[a x x x x b c]
+[a x x x x x b c]
+[a x x x x x x b c]
+[a x x x x x x x b c]
+[a x x x x x x x x b c]
+[a x x x x x x x x x b c]
+[a x x x x x x x x x x b c]
+
+Process finished with exit code 0
+
+</code></pre>
+<p>可见是开辟了双倍内存后的插入</p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#golang%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AE%97%E6%B3%95%E4%B9%8B%E6%95%B0%E7%BB%84%E7%9B%B8%E5%85%B3">Golang数据结构算法之数组相关</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+
+        
+
+        <div class="site-footer">
+  <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=1322041120&auto=1&height=66"></iframe>
+  <a class="rss" href="https://lagoonwe.github.io//atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
